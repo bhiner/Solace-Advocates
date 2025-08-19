@@ -4,9 +4,20 @@ import { useEffect, useState } from "react";
 import { IAdvocate } from "@/models/models";
 
 export default function Home() {
+  function formatPhoneNumber(phone: string): string {
+    const cleaned = ('' + phone).replace(/\D/g, '');
+    if (cleaned.length === 10) {
+      const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+      if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
+      }
+    }
+    return phone;
+  }
   const [advocates, setAdvocates] = useState<IAdvocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<IAdvocate[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedSpecialties, setExpandedSpecialties] = useState<{[key: number]: boolean}>({});
 
   useEffect(() => {
     console.log("fetching advocates...");
@@ -47,6 +58,7 @@ export default function Home() {
 
     setSearchTerm("");
     document.getElementById("search-term").innerHTML = '';
+    setExpandedSpecialties({});
   };
 
   return (
@@ -66,7 +78,7 @@ export default function Home() {
               value={searchTerm}
             />
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-green-800 transition"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800 transition"
               onClick={handleResetClick}
             >
               Reset Search
@@ -76,34 +88,51 @@ export default function Home() {
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg shadow">
             <thead>
-              <tr className="bg-blue-100">
+              <tr className="bg-gray-300">
                 <th className="py-2 px-4 text-left font-semibold">First Name</th>
                 <th className="py-2 px-4 text-left font-semibold">Last Name</th>
-                <th className="py-2 px-4 text-left font-semibold">City</th>
+                <th className="min-w-40 py-2 px-4 text-left font-semibold">City</th>
                 <th className="py-2 px-4 text-left font-semibold">Degree</th>
                 <th className="py-2 px-4 text-left font-semibold">Specialties</th>
                 <th className="py-2 px-4 text-left font-semibold">Years of Experience</th>
-                <th className="py-2 px-4 text-left font-semibold">Phone Number</th>
+                <th className="min-w-40 py-2 px-4 text-left font-semibold">Phone Number</th>
               </tr>
             </thead>
             <tbody>
-              {filteredAdvocates.map((advocate, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                  <td className="py-2 px-4">{advocate.firstName}</td>
-                  <td className="py-2 px-4">{advocate.lastName}</td>
-                  <td className="py-2 px-4">{advocate.city}</td>
-                  <td className="py-2 px-4">{advocate.degree}</td>
-                  <td className="py-2 px-4">
-                    {advocate.specialties.map((s: string, i: number) => (
-                      <span key={i} className="inline-block bg-blue-50 text-blue-700 px-2 py-1 rounded mr-1 mb-1 text-xs">
-                        {s}
-                      </span>
-                    ))}
-                  </td>
-                  <td className="py-2 px-4">{advocate.yearsOfExperience}</td>
-                  <td className="py-2 px-4">{advocate.phoneNumber}</td>
-                </tr>
-              ))}
+              {filteredAdvocates.map((advocate, idx) => {
+                const isExpanded = expandedSpecialties[idx];
+                return (
+                  <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                    <td className="py-2 px-4">{advocate.firstName}</td>
+                    <td className="py-2 px-4">{advocate.lastName}</td>
+                    <td className="py-2 px-4">{advocate.city}</td>
+                    <td className="py-2 px-4">{advocate.degree}</td>
+                    <td className="py-2 px-4">
+                      {(isExpanded ? advocate.specialties : advocate.specialties.slice(0, 3)).map((s: string, i: number) => (
+                        <span key={i} className="inline-block bg-blue-50 text-blue-700 px-2 py-1 rounded mr-1 mb-1 text-xs">
+                          {s}
+                        </span>
+                      ))}
+                      {advocate.specialties.length > 3 && !isExpanded && (
+                        <button
+                          className="inline-block bg-gray-200 text-gray-600 px-2 py-1 rounded mr-1 mb-1 text-xs cursor-pointer hover:bg-gray-300"
+                          onClick={() => setExpandedSpecialties(prev => ({ ...prev, [idx]: true }))}
+                          aria-label="Show all specialties"
+                        >Show More</button>
+                      )}
+                      {advocate.specialties.length > 3 && isExpanded && (
+                        <button
+                          className="inline-block bg-gray-200 text-gray-600 px-2 py-1 rounded mr-1 mb-1 text-xs cursor-pointer hover:bg-gray-300"
+                          onClick={() => setExpandedSpecialties(prev => ({ ...prev, [idx]: false }))}
+                          aria-label="Show less specialties"
+                        >Show less</button>
+                      )}
+                    </td>
+                    <td className="py-2 px-4">{advocate.yearsOfExperience}</td>
+                    <td className="py-2 px-4">{formatPhoneNumber(advocate.phoneNumber)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
