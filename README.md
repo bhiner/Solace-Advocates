@@ -39,3 +39,8 @@ npx drizzle-kit push
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
+
+```PowerShell
+Invoke-WebRequest -Uri http://localhost:3000/api/seed -Method POST
+```
+
