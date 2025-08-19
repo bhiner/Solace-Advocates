@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { IAdvocate } from "@/models/models";
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  const [advocates, setAdvocates] = useState<IAdvocate[]>([]);
+  const [filteredAdvocates, setFilteredAdvocates] = useState<IAdvocate[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     console.log("fetching advocates...");
@@ -16,76 +18,96 @@ export default function Home() {
     });
   }, []);
 
-  const onChange = (e) => {
+  const onSearchTextChange = (e) => {
     const searchTerm = e.target.value;
+
+    setSearchTerm(searchTerm);
 
     document.getElementById("search-term").innerHTML = searchTerm;
 
     console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.includes(searchTerm)
-      );
-    });
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      const filteredAdvocates = advocates.filter((advocate) => {
+        return (
+          advocate.firstName.toLowerCase().includes(lowerSearchTerm) ||
+          advocate.lastName.toLowerCase().includes(lowerSearchTerm) ||
+          advocate.city.toLowerCase().includes(lowerSearchTerm) ||
+          advocate.degree.toLowerCase().includes(lowerSearchTerm) ||
+          advocate.specialties.some((s: string) => s.toLowerCase().includes(lowerSearchTerm)) ||
+          advocate.yearsOfExperience == searchTerm
+        );
+      });
 
     setFilteredAdvocates(filteredAdvocates);
   };
 
-  const onClick = () => {
+  const handleResetClick = () => {
     console.log(advocates);
     setFilteredAdvocates(advocates);
+
+    setSearchTerm("");
+    document.getElementById("search-term").innerHTML = '';
   };
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
-        </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
-      </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>City</th>
-          <th>Degree</th>
-          <th>Specialties</th>
-          <th>Years of Experience</th>
-          <th>Phone Number</th>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate) => {
-            return (
-              <tr>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
+    <main className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6 text-green-800">Solace Advocates</h1>
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <p className="font-semibold mb-2">Search</p>
+          <p className="mb-4 text-gray-600">
+            Searching for: <span id="search-term" className="font-mono text-blue-600"></span>
+          </p>
+          <div className="flex gap-4">
+            <input
+              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              onChange={onSearchTextChange}
+              placeholder="Type to search..."
+              value={searchTerm}
+            />
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-green-800 transition"
+              onClick={handleResetClick}
+            >
+              Reset Search
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg shadow">
+            <thead>
+              <tr className="bg-blue-100">
+                <th className="py-2 px-4 text-left font-semibold">First Name</th>
+                <th className="py-2 px-4 text-left font-semibold">Last Name</th>
+                <th className="py-2 px-4 text-left font-semibold">City</th>
+                <th className="py-2 px-4 text-left font-semibold">Degree</th>
+                <th className="py-2 px-4 text-left font-semibold">Specialties</th>
+                <th className="py-2 px-4 text-left font-semibold">Years of Experience</th>
+                <th className="py-2 px-4 text-left font-semibold">Phone Number</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {filteredAdvocates.map((advocate, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                  <td className="py-2 px-4">{advocate.firstName}</td>
+                  <td className="py-2 px-4">{advocate.lastName}</td>
+                  <td className="py-2 px-4">{advocate.city}</td>
+                  <td className="py-2 px-4">{advocate.degree}</td>
+                  <td className="py-2 px-4">
+                    {advocate.specialties.map((s: string, i: number) => (
+                      <span key={i} className="inline-block bg-blue-50 text-blue-700 px-2 py-1 rounded mr-1 mb-1 text-xs">
+                        {s}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="py-2 px-4">{advocate.yearsOfExperience}</td>
+                  <td className="py-2 px-4">{advocate.phoneNumber}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </main>
   );
 }

@@ -39,3 +39,8 @@ npx drizzle-kit push
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
+
+
+## Troubleshooting
+1. Docker Desktop Virtualization
+i. Enable in bios -> Advanced -> SVM Mode -> Enabled
