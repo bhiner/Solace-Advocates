@@ -4,16 +4,6 @@ import { useEffect, useState } from "react";
 import { IAdvocate } from "@/models/models";
 
 export default function Home() {
-  function formatPhoneNumber(phone: string): string {
-    const cleaned = ('' + phone).replace(/\D/g, '');
-    if (cleaned.length === 10) {
-      const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-      if (match) {
-        return `(${match[1]}) ${match[2]}-${match[3]}`;
-      }
-    }
-    return phone;
-  }
   const [advocates, setAdvocates] = useState<IAdvocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<IAdvocate[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +50,17 @@ export default function Home() {
     document.getElementById("search-term").innerHTML = '';
     setExpandedSpecialties({});
   };
+
+  const formatPhoneNumber = (phone: string): string => {
+    const cleaned = ('' + phone).replace(/\D/g, '');
+    if (cleaned.length === 10) {
+      const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+      if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
+      }
+    }
+    return phone;
+  }
 
   return (
     <main className="p-6 bg-gray-50 min-h-screen">
