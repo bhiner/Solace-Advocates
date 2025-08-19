@@ -11,3 +11,4 @@
     - Right not, part of the table would not be visible
 6. Add cancellation support (abort controller) to get advocates
     - React has double render in dev mode. First API call is never cancelled
+7. Additional polishing styling
